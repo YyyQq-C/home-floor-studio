@@ -4,7 +4,9 @@
 
 用户已将设备验收范围调整为 PC 普通浏览器。Google Chrome 与 Microsoft Edge 各完成 38 项 Playwright 端到端自动化流程；这不能推广到 Firefox 等其他浏览器，也不能替代长时间运行及真实户型图的人工验收。
 
-2026-11-03 最终 0.1.0 ZIP 解压后的 `site/` 通过本机 HTTP `/site/` 子路径运行，Chrome 与 Edge 各 38 项端到端流程通过。ChatGPT 隔离浏览器加载合成户型后，确认 2D/3D 预览和单项导出；新增的“导出完整项目包”已实际下载并检查，包含可编辑项目 JSON、SVG、PNG、GLB、内层 HA ZIP 和说明，内层 HA 包含卡片、户型数据及许可。自动化也对完整项目 ZIP 检查这些文件的格式。1280、1366、1440px 下顶部操作栏完整显示。此次只使用合成示例，未上传家庭图纸或连接家庭 HA。
+2026-11-03 最新 0.1.0 ZIP 解压后的 `site/` 通过本机静态 HTTP 服务运行，已安装的 Microsoft Edge 与 Google Chrome 各完成 38 项 Playwright 端到端流程，全部通过。流程涵盖底图、模拟 AI、手工编辑、2D/3D、导出及 HA 卡片；没有调用真实 AI 服务或家庭 HA。此前 ChatGPT 隔离浏览器加载合成户型，确认 2D/3D 预览和单项导出；“导出完整项目包”已实际下载并检查，包含可编辑项目 JSON、SVG、PNG、GLB、内层 HA ZIP 和说明，内层 HA 包含卡片、户型数据及许可。自动化也检查完整项目 ZIP 的文件格式。1280、1366、1440px 下顶部操作栏完整显示。未上传家庭图纸或连接家庭 HA。
+
+同日修复识别响应体无界读取：现在以流方式限制到 2 MiB，超限后取消读取。`npm test` 为 99 项通过；`npm run build` 与 `npm run package:release` 均通过。此修复不改变识别界面，真实 AI 服务仍未验收。
 
 | 原计划阶段 | 当前证据 | 尚未完成或证据不足 |
 | --- | --- | --- |
@@ -13,7 +15,7 @@
 | AI 识别 | 兼容视觉聊天请求、候选叠加、显式应用、取消、超时及错误处理有模拟测试 | 用户尚未确定首发服务和模型；未进行真实接口、费用及数据处理方式验证 |
 | 2D、3D 和家具 | 端到端测试覆盖 PNG、SVG、GLB、尺寸单位及内嵌纹理重新加载；提供基础家具和材质 | 真实图纸的全对象位置对应及目标设备视觉验收尚不充分 |
 | HA 组件 | 在全新隔离 HA 2024.12.5 中完成初始化后，使用包内文件、界面资源注册、默认仪表盘新建卡片、模拟实体绑定与状态切换；另测 2D/3D、详情和保留 ID 更新 | 家庭 HA 和真实设备尚未验证；HA 新版本兼容范围有限 |
-| 打磨与发布 | 有版本包、中文指南、隐私说明、格式说明及第三方许可；完整项目 ZIP 汇集可编辑备份、2D/3D 成品和 HA 安装包；最终 ZIP 解压后的 `site/` 经 HTTP 子路径在 Chrome 与 Edge 下各通过 38 项端到端流程，包含完整项目 ZIP 文件检查和 12 轮 2D/3D 切换清理检查；源码已推送到 GitHub `main`；GitHub Actions 运行 `41599639670` 在 runner 上通过，下载的构建包校验了 29 项清单文件 | 尚未创建永久 GitHub Release，Actions artifact 仅保留 14 天；PC 长时间运行、其他浏览器和主题验收未完成；跨版本升级证据有限 |
+| 打磨与发布 | 有版本包、中文指南、隐私说明、格式说明及第三方许可；完整项目 ZIP 汇集可编辑备份、2D/3D 成品和 HA 安装包；最新 ZIP 解压后的 `site/` 经静态 HTTP 在 Edge、Chrome 各通过 38 项端到端流程；既有完整项目 ZIP 文件检查、12 轮 2D/3D 切换清理检查仍通过；源码修复已推送到 GitHub `main`，提交 `d936431`；GitHub Actions 运行 `41600635672` 在 runner 上通过 | 尚未创建永久 GitHub Release，Actions artifact 仅保留 14 天；PC 长时间运行、其他浏览器和主题验收未完成；跨版本升级证据有限 |
 
 ## 单张本地 CAD 图纸临时检查
 
@@ -25,11 +27,11 @@
 
 ## 当前可复现的自动化检查
 
-`npm test`：98 项单元测试通过。`npm run package:release`：构建并生成本地 ZIP 和 SHA256；不上传发布。`npm run test:e2e`：使用本机 Chrome 或 Edge 运行，每种浏览器 38 项通过；包含完整项目 ZIP 导出检查和 12 轮 2D/3D 预览切换，AI 和 HA 自动化接口使用模拟服务。当前发布 ZIP 解压后的 `site/` 通过 HTTP `/site/` 子路径运行，Chrome 与 Edge 各 38 项通过。隔离 HA 的独立实测范围见 [HA 卡片说明](ha-preview.md)。
+`npm test`：99 项单元测试通过。`npm run package:release`：构建并生成本地 ZIP 和 SHA256；不上传发布。`npm run test:e2e`：通过 `HFS_BROWSER_PATH` 使用已安装的 Microsoft Edge 或 Google Chrome，并用 `HFS_E2E_URL` 直连本机静态 HTTP 站点；最新 ZIP 解压后的 `site/` 在两种浏览器各完成 38 项流程。AI 和 HA 自动化接口使用模拟服务。既有端到端用例还检查完整项目 ZIP 和 12 轮 2D/3D 预览切换。隔离 HA 的独立实测范围见 [HA 卡片说明](ha-preview.md)。
 
-源码和文档已于 2026-11-03 通过提交 `8c4166bb7302c195510d3b09cfaf4852967ba130` 推送到公开仓库 `YyyQq-C/home-floor-studio` 的 `main` 分支。GitHub Actions 构建包作为 14 天工作流 artifact 保存；尚未创建长期可下载的 GitHub Release。
+源码和文档已推送到公开仓库 `YyyQq-C/home-floor-studio` 的 `main` 分支。当前源码修复提交为 `d936431282ff89b2ddf5944dc6eb3bda681357b6`。GitHub Actions 最近一次源码 CI 运行 [41600635672](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41600635672) 已成功；构建包作为 14 天工作流 artifact 保存，尚未创建长期可下载的 GitHub Release。
 
-GitHub Actions 工作流位于 `.github/workflows/ci.yml`，在 `main` 推送和 Pull Request 时运行单元测试、构建发布包并上传短期工作流产物。2026-11-03 的 [CI 运行记录](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41599639670)已成功完成安装、单元测试、发布构建和 artifact 上传。
+GitHub Actions 工作流位于 `.github/workflows/ci.yml`，在 `main` 推送和 Pull Request 时运行单元测试、构建发布包并上传短期工作流产物。2026-11-03 的 [CI 运行记录](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41600635672)已成功完成安装、99 项单元测试、发布构建和 artifact 上传。
 
 ## 需要用户确定的信息
 
