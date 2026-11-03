@@ -4,6 +4,10 @@
 
 独立户型编辑和生成工具，目标是生成 2D、3D 户型并通过配套组件接入 Home Assistant。
 
+## 获取与运行
+
+当前公开预览版：[下载 Home Floor Studio 0.1.0 ZIP](https://github.com/YyyQq-C/home-floor-studio/releases/download/v0.1.0/home-floor-studio-0.1.0.zip)，[查看版本说明和 SHA-256 校验文件](https://github.com/YyyQq-C/home-floor-studio/releases/tag/v0.1.0)。解压后按包内“开始使用.txt”运行或部署 `site/`；请通过本机 localhost 或静态 HTTP/HTTPS 服务打开，不要直接用 `file://` 打开 `index.html`。非商业使用免费，商业使用须联系授权，见 [LICENSE](LICENSE)。
+
 ## 界面预览
 
 以下截图来自内置合成示例，用于展示编辑器效果，不代表实际户型或施工图。
