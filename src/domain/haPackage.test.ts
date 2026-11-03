@@ -1,0 +1,8 @@
+import {describe,it,expect} from 'vitest';
+import {createDemoProject,createProject} from './project';
+import {exportHaProject,parseHaProject} from './haPackage';
+describe('HA 户型包',()=>{
+  it('去除参考底图并保留设备标记',()=>{const p=createProject();p.background='data:image/png;base64,AAAA';p.markers.push({id:'one',name:'灯',kind:'light',position:{x:20,y:30}});const json=exportHaProject(p);expect(json).not.toContain('AAAA');expect(parseHaProject(JSON.parse(json)).markers[0].name).toBe('灯');expect(p.background).not.toBeNull()});
+  it('只导出支持的字段，过滤项目及嵌套对象中的额外数据',()=>{const p=createDemoProject();p.walls[0].color='#123456';p.walls[0].finish='satin';p.rooms[0].floorStyle='tile';p.furniture[0].color='#334455';p.markers[0].height=150;p.markers[0].icon='light';p.markers[0].roomId=p.rooms[0].id;p.openings[1].swing='start-positive';const clean=structuredClone(p);(p as unknown as Record<string,unknown>).privateToken='do-not-export';(p.walls[0] as unknown as Record<string,unknown>).privateNote='nested-secret';(p.markers[0].position as unknown as Record<string,unknown>).extra='point-secret';const output=exportHaProject(p);expect(output).not.toContain('do-not-export');expect(output).not.toContain('nested-secret');expect(output).not.toContain('point-secret');expect(parseHaProject(JSON.parse(output))).toEqual(clean);expect((p as unknown as Record<string,unknown>).privateToken).toBe('do-not-export')});
+  it('拒绝未知版本和含底图的数据',()=>{const p=createProject();p.background='data:image/png;base64,AAAA';expect(()=>parseHaProject({format:'home-floor-studio',version:2,project:p})).toThrow();expect(()=>parseHaProject({format:'home-floor-studio',version:1,project:p})).toThrow()});
+});

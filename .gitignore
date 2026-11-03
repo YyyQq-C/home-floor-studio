@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+*.local
+dist-ha/
+releases/
+public/ha-release/
+public/licenses/
+
+playwright-report/
+test-results/

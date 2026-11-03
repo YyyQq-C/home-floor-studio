@@ -1,0 +1,14 @@
+import {describe,it,expect} from 'vitest';
+import {createDemoProject,createEmptyProject} from './project';
+import {inspectProject} from './diagnostics';
+
+describe('户型检查',()=>{
+  it('提示空白项目缺少墙体、房间和比例',()=>{const issues=inspectProject(createEmptyProject());expect(issues.map(i=>i.key)).toEqual(['no-walls','no-rooms','uncalibrated'])});
+  it('识别被裁剪和重叠的门窗，并指向待修正的对象',()=>{const p=createDemoProject();p.cmPerUnit=1;p.openings=[{id:'a',wallId:'wall-0',kind:'door',center:.02,width:100,sill:0,height:300},{id:'b',wallId:'wall-0',kind:'window',center:.05,width:100,sill:90,height:120}];const issues=inspectProject(p);expect(issues.some(i=>i.key==='width-a'&&i.target==='a')).toBe(true);expect(issues.some(i=>i.key==='height-a')).toBe(true);expect(issues.some(i=>i.key==='overlap-a-b')).toBe(true)});
+  it('识别未连接端点，但不将 T 形接点误判为未连接',()=>{const p=createEmptyProject();p.cmPerUnit=1;p.walls=[{id:'a',start:{x:0,y:0},end:{x:100,y:0},height:280,thickness:12},{id:'b',start:{x:50,y:0},end:{x:50,y:100},height:280,thickness:12}];const issues=inspectProject(p);expect(issues.some(i=>i.key==='loose-b-start')).toBe(false);expect(issues.find(i=>i.key==='loose-b-end')).toMatchObject({target:'b',focus:{x:50,y:100}})});
+  it('定位共线重叠墙体，不把端点相接或十字相交视为重叠',()=>{const p=createEmptyProject();p.walls=[{id:'a',start:{x:0,y:0},end:{x:100,y:0},height:280,thickness:12},{id:'b',start:{x:80,y:0},end:{x:40,y:0},height:280,thickness:12},{id:'c',start:{x:100,y:0},end:{x:150,y:0},height:280,thickness:12},{id:'d',start:{x:20,y:-30},end:{x:20,y:30},height:280,thickness:12}];const overlaps=inspectProject(p).filter(issue=>issue.key.startsWith('wall-overlap-'));expect(overlaps).toHaveLength(1);expect(overlaps[0]).toMatchObject({target:'b',focus:{x:60,y:0}})});
+  it('提示失效房间关联并定位到设备',()=>{const p=createDemoProject(),marker=p.markers[0];marker.roomId='deleted-room';expect(inspectProject(p).find(i=>i.key===`missing-room-${marker.id}`)).toMatchObject({target:marker.id,focus:marker.position});marker.roomId=p.rooms[0].id;expect(inspectProject(p).some(i=>i.key===`missing-room-${marker.id}`)).toBe(false)});
+  it('墙体超过检查上限时明确提示未覆盖的范围',()=>{const p=createEmptyProject();p.walls=Array.from({length:501},(_,i)=>({id:`w${i}`,start:{x:i*10,y:0},end:{x:i*10+5,y:0},height:280,thickness:12}));const issues=inspectProject(p);expect(issues.find(i=>i.key==='wall-check-limit')?.message).toContain('仅检查前 500 面');expect(issues.some(i=>i.target==='w500')).toBe(false)});
+  it('大量重叠结果有上限并标注结果不完整',()=>{const p=createEmptyProject();p.walls=Array.from({length:30},(_,i)=>({id:`w${i}`,start:{x:0,y:0},end:{x:100,y:0},height:280,thickness:12}));const issues=inspectProject(p);expect(issues.length).toBeLessThanOrEqual(201);expect(issues.some(i=>i.key==='issue-check-limit')).toBe(true)});
+  it('校准后悬空墙端被明确提示',()=>{const p=createDemoProject();p.cmPerUnit=1;p.walls.find(wall=>wall.id==='wall-6')!.end.x=550;expect(inspectProject(p).some(i=>i.key==='loose-wall-6-end')).toBe(true)});
+});
