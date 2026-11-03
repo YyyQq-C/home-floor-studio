@@ -15,7 +15,7 @@
 | AI 识别 | 兼容视觉聊天请求、候选叠加、显式应用、取消、超时及错误处理有模拟测试 | 用户尚未确定首发服务和模型；未进行真实接口、费用及数据处理方式验证 |
 | 2D、3D 和家具 | 端到端测试覆盖 PNG、SVG、GLB、尺寸单位及内嵌纹理重新加载；提供基础家具和材质 | 真实图纸的全对象位置对应及目标设备视觉验收尚不充分 |
 | HA 组件 | 在全新隔离 HA 2024.12.5 中完成初始化后，使用包内文件、界面资源注册、默认仪表盘新建卡片、模拟实体绑定与状态切换；另测 2D/3D、详情和保留 ID 更新 | 家庭 HA 和真实设备尚未验证；HA 新版本兼容范围有限 |
-| 打磨与发布 | 有版本包、中文指南、隐私说明、格式说明及第三方许可；完整项目 ZIP 汇集可编辑备份、2D/3D 成品和 HA 安装包；最新 ZIP 解压后的 `site/` 经静态 HTTP 在 Edge、Chrome 各通过 38 项端到端流程；既有完整项目 ZIP 文件检查、12 轮 2D/3D 切换清理检查仍通过；源码修复已推送到 GitHub `main`，提交 `d936431`；GitHub Actions 运行 `41600635672` 在 runner 上通过 | 尚未创建永久 GitHub Release，Actions artifact 仅保留 14 天；PC 长时间运行、其他浏览器和主题验收未完成；跨版本升级证据有限 |
+| 打磨与发布 | 有版本包、中文指南、隐私说明、格式说明及第三方许可；完整项目 ZIP 汇集可编辑备份、2D/3D 成品和 HA 安装包；GitHub CI 产物解压后的 `site/` 经静态 HTTP 在 Edge、Chrome 各通过 38 项端到端流程；既有完整项目 ZIP 文件检查、12 轮 2D/3D 切换清理检查仍通过；源码修复已推送到 GitHub `main`，提交 `d936431`；已创建公开预发布 `v0.1.0`，附件校验通过 | PC 长时间运行、其他浏览器和主题验收未完成；跨版本升级证据有限 |
 
 ## 单张本地 CAD 图纸临时检查
 
@@ -29,7 +29,11 @@
 
 `npm test`：99 项单元测试通过。`npm run package:release`：构建并生成本地 ZIP 和 SHA256；不上传发布。`npm run test:e2e`：通过 `HFS_BROWSER_PATH` 使用已安装的 Microsoft Edge 或 Google Chrome，并用 `HFS_E2E_URL` 直连本机静态 HTTP 站点；最新 ZIP 解压后的 `site/` 在两种浏览器各完成 38 项流程。AI 和 HA 自动化接口使用模拟服务。既有端到端用例还检查完整项目 ZIP 和 12 轮 2D/3D 预览切换。隔离 HA 的独立实测范围见 [HA 卡片说明](ha-preview.md)。
 
-源码和文档已推送到公开仓库 `YyyQq-C/home-floor-studio` 的 `main` 分支。当前源码修复提交为 `d936431282ff89b2ddf5944dc6eb3bda681357b6`。GitHub Actions 最近一次源码 CI 运行 [41600635672](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41600635672) 已成功；构建包作为 14 天工作流 artifact 保存，尚未创建长期可下载的 GitHub Release。
+源码和文档已推送到公开仓库 `YyyQq-C/home-floor-studio` 的 `main` 分支。源码修复提交为 `d936431282ff89b2ddf5944dc6eb3bda681357b6`。GitHub Actions 源码 CI 运行 [41600635672](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41600635672) 已成功。
+
+## 公开发布 v0.1.0
+
+2026-11-03 已将 GitHub Actions 运行 `41601821631` 生成的开发预览包作为公开预发布 [v0.1.0](https://github.com/YyyQq-C/home-floor-studio/releases/tag/v0.1.0) 上传。标签指向提交 `2fb83d6ccdff482faba8e319097a25867a329484`；附件为 ZIP 和 `.sha256` 文件。GitHub 返回的 ZIP SHA-256 为 `8b6e0b00f13891f74c4eecb9697c0e14e342bb60c3a19423b70c5877417d06c4`，已下载附件并与校验文件核对一致。v0.1.0 包内本验收文档是在创建 Release 前构建的状态快照；当前状态以仓库 `main` 上的本文档为准。
 
 GitHub Actions 工作流位于 `.github/workflows/ci.yml`，在 `main` 推送和 Pull Request 时运行单元测试、构建发布包并上传短期工作流产物。2026-11-03 的 [CI 运行记录](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41600635672)已成功完成安装、99 项单元测试、发布构建和 artifact 上传。
 
