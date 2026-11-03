@@ -6,7 +6,7 @@
 
 ## 获取与运行
 
-当前公开预览版：[下载 Home Floor Studio 0.1.0 ZIP](https://github.com/YyyQq-C/home-floor-studio/releases/download/v0.1.0/home-floor-studio-0.1.0.zip)，[查看版本说明和 SHA-256 校验文件](https://github.com/YyyQq-C/home-floor-studio/releases/tag/v0.1.0)。解压后按包内“开始使用.txt”运行或部署 `site/`；请通过本机 localhost 或静态 HTTP/HTTPS 服务打开，不要直接用 `file://` 打开 `index.html`。非商业使用免费，商业使用须联系授权，见 [LICENSE](LICENSE)。
+当前公开预览版：[在线打开 Home Floor Studio](https://yyyqq-c.github.io/home-floor-studio/)；也可[下载 Home Floor Studio 0.1.0 ZIP](https://github.com/YyyQq-C/home-floor-studio/releases/download/v0.1.0/home-floor-studio-0.1.0.zip)，[查看版本说明和 SHA-256 校验文件](https://github.com/YyyQq-C/home-floor-studio/releases/tag/v0.1.0)。项目保存在当前浏览器和网址下；AI 需自行配置，图片仅在点击发送后传给所选服务。下载包可部署 `site/`，或通过本机 localhost 打开；不要直接用 `file://` 打开 `index.html`。非商业使用免费，商业使用须联系授权，见 [LICENSE](LICENSE)。
 
 ## 界面预览
 
