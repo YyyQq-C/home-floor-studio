@@ -6,6 +6,8 @@
 
 2026-11-03 最新 0.1.0 ZIP 解压后的 `site/` 通过本机静态 HTTP 服务运行，已安装的 Microsoft Edge 与 Google Chrome 各完成 38 项 Playwright 端到端流程，全部通过。流程涵盖底图、模拟 AI、手工编辑、2D/3D、导出及 HA 卡片；没有调用真实 AI 服务或家庭 HA。此前 ChatGPT 隔离浏览器加载合成户型，确认 2D/3D 预览和单项导出；“导出完整项目包”已实际下载并检查，包含可编辑项目 JSON、SVG、PNG、GLB、内层 HA ZIP 和说明，内层 HA 包含卡片、户型数据及许可。自动化也检查完整项目 ZIP 的文件格式。1280、1366、1440px 下顶部操作栏完整显示。未上传家庭图纸或连接家庭 HA。
 
+2026-11-03 已公开部署 [GitHub Pages 在线预览](https://yyyqq-c.github.io/home-floor-studio/)。Actions 发布运行 [41604609451](https://github.com/YyyQq-C/home-floor-studio/actions/runs/41604609451) 成功；Edge 实际加载页面后，使用 `HFS_E2E_URL` 对线上网址执行全部 38 项端到端流程，全部通过。页面使用 HTTPS 和仓库子路径，项目仍保存在当前浏览器与网址下；AI 服务为可选配置，验收使用模拟服务。没有上传家庭图纸或连接家庭 HA。
+
 同日修复识别响应体无界读取：现在以流方式限制到 2 MiB，超限后取消读取。`npm test` 为 99 项通过；`npm run build` 与 `npm run package:release` 均通过。此修复不改变识别界面，真实 AI 服务仍未验收。
 
 | 原计划阶段 | 当前证据 | 尚未完成或证据不足 |
