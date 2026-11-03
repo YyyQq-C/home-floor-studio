@@ -1,5 +1,23 @@
 import {validRoomPolygon,type Point,type Wall,type Room,type Opening} from './project';
 
+const MAX_RECOGNITION_RESPONSE_BYTES=2*1024*1024;
+
+/** 限制识别服务响应的读取字节数，避免异常大的响应占满浏览器内存。 */
+async function readRecognitionResponse(response:Response):Promise<string> {
+  const declaredLength=response.headers.get('Content-Length');
+  if(declaredLength!==null&&Number(declaredLength)>MAX_RECOGNITION_RESPONSE_BYTES){await response.body?.cancel();throw new Error('Recognition response exceeds size limit');}
+  if(!response.body)throw new Error('Recognition response body is empty');
+  const reader=response.body.getReader(),decoder=new TextDecoder();let size=0,text='';
+  try {
+    while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;
+      if(size>MAX_RECOGNITION_RESPONSE_BYTES){await reader.cancel();throw new Error('Recognition response exceeds size limit');}
+      text+=decoder.decode(value,{stream:true});
+    }
+    text+=decoder.decode();
+  } finally {reader.releaseLock();}
+  return text;
+}
+
 export type Candidate={walls:Wall[];rooms:Room[];openings:Opening[];ignoredWalls:number;ignoredRooms:number;ignoredOpenings:number};
 type NormalPoint={x:number;y:number};
 /** 将模型的归一化坐标映射到与 SVG 底图相同的等比显示区域。 */
@@ -50,7 +68,7 @@ export async function recognizeFloorplan(settings:{endpoint:string;model:string;
   let endpoint:string;try{endpoint=validateEndpoint(settings.endpoint)}catch{throw new RecognitionError('endpoint')}if(!settings.model.trim())throw new RecognitionError('model');
   let response:Response;try{response=await fetch(endpoint,{method:'POST',credentials:'omit',redirect:'error',signal:settings.signal,headers:{'Content-Type':'application/json',...(settings.key?{'Authorization':`Bearer ${settings.key}`}:{})},body:JSON.stringify({model:settings.model.trim(),messages:[{role:'user',content:[{type:'text',text:'Identify architectural wall centerlines, room polygons, and door and window openings in the floor plan image. Return JSON only: {"walls":[{"start":{"x":0,"y":0},"end":{"x":0,"y":0}}],"rooms":[{"name":"name","points":[{"x":0,"y":0}]}],"openings":[{"wallIndex":0,"kind":"door or window","start":{"x":0,"y":0},"end":{"x":0,"y":0}}]}. Coordinates are normalized to 0-1000 independently across original image width and height, top-left origin. wallIndex is the zero-based index in walls; opening endpoints must lie on that wall. kind must be exactly door or window. Do not guess dimensions. Rooms must be simple non-crossing polygons; list each vertex once without repeating the first vertex at the end. If uncertain omit the item.'},{type:'image_url',image_url:{url:settings.image}}]}],temperature:0})});}catch(error){if(settings.signal.aborted)throw error;throw new RecognitionError('network')}
   if(!response.ok)throw new RecognitionError(response.status===401||response.status===403?'auth':response.status===429?'rate-limit':'http',response.status);
-  try{const payload=await response.json() as {choices?:{message?:{content?:unknown}}[]};const content=payload.choices?.[0]?.message?.content;if(typeof content!=='string'||content.length>1000000)throw new Error('Invalid recognition response');
+  try{const payload=JSON.parse(await readRecognitionResponse(response)) as {choices?:{message?:{content?:unknown}}[]};const content=payload.choices?.[0]?.message?.content;if(typeof content!=='string'||content.length>1000000)throw new Error('Invalid recognition response');
     const trimmed=content.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');return JSON.parse(trimmed);
   }catch(error){if(settings.signal.aborted)throw error;throw new RecognitionError('format')}
 
